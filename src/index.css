@@ -102,10 +102,6 @@ All colors MUST be HSL.
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
-
-  html {
-    @apply dark;
-  }
 }
 
 @layer components {
