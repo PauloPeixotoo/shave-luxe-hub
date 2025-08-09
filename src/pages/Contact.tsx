@@ -6,20 +6,67 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/Layout";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { contactSchema, ContactFormData } from "@/lib/validations";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: ""
+  const { toast } = useToast();
+  const { trackContact } = useAnalytics();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema)
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Dados do contato:", formData);
-    alert("Mensagem enviada! Entraremos em contato em breve.");
+  const onSubmit = async (data: ContactFormData) => {
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .insert([{
+          name: data.name,
+          email: data.email || null,
+          phone: data.phone,
+          subject: data.subject,
+          message: data.message
+        }]);
+
+      if (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível enviar sua mensagem. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Track analytics
+      trackContact(data.subject);
+
+      // Limpar formulário
+      reset();
+
+      toast({
+        title: "Sucesso!",
+        description: "Mensagem enviada! Entraremos em contato em breve.",
+      });
+
+    } catch (error) {
+      console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro inesperado. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleWhatsApp = () => {
@@ -129,29 +176,31 @@ const Contact = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="name">Nome *</Label>
                         <Input
                           id="name"
                           type="text"
-                          value={formData.name}
-                          onChange={(e) => setFormData({...formData, name: e.target.value})}
-                          required
+                          {...register("name")}
                           placeholder="Seu nome"
                         />
+                        {errors.name && (
+                          <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="phone">Telefone *</Label>
                         <Input
                           id="phone"
                           type="tel"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                          required
+                          {...register("phone")}
                           placeholder="(11) 99999-9999"
                         />
+                        {errors.phone && (
+                          <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>
+                        )}
                       </div>
                     </div>
 
@@ -160,10 +209,12 @@ const Contact = () => {
                       <Input
                         id="email"
                         type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        {...register("email")}
                         placeholder="seu@email.com"
                       />
+                      {errors.email && (
+                        <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+                      )}
                     </div>
 
                     <div>
@@ -171,27 +222,34 @@ const Contact = () => {
                       <Input
                         id="subject"
                         type="text"
-                        value={formData.subject}
-                        onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                        required
+                        {...register("subject")}
                         placeholder="Sobre o que você gostaria de falar?"
                       />
+                      {errors.subject && (
+                        <p className="text-sm text-red-500 mt-1">{errors.subject.message}</p>
+                      )}
                     </div>
 
                     <div>
                       <Label htmlFor="message">Mensagem *</Label>
                       <Textarea
                         id="message"
-                        value={formData.message}
-                        onChange={(e) => setFormData({...formData, message: e.target.value})}
-                        required
+                        {...register("message")}
                         placeholder="Sua mensagem..."
                         rows={5}
                       />
+                      {errors.message && (
+                        <p className="text-sm text-red-500 mt-1">{errors.message.message}</p>
+                      )}
                     </div>
 
-                    <Button type="submit" size="lg" className="w-full bg-gradient-primary hover:opacity-90">
-                      Enviar Mensagem
+                    <Button 
+                      type="submit" 
+                      size="lg" 
+                      className="w-full bg-gradient-primary hover:opacity-90"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
                     </Button>
                   </form>
                 </CardContent>

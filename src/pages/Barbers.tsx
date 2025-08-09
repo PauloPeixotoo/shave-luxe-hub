@@ -3,90 +3,87 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
+import { useBarbers } from "@/hooks/useSupabase";
 
 const Barbers = () => {
-  const barbers = [
-    { 
-      name: "Carlos Silva", 
-      experience: "8 anos", 
-      rating: 4.9, 
-      specialty: "Cortes modernos",
-      bio: "Especialista em cortes modernos e degradês. Sempre atualizado com as últimas tendências.",
-      services: ["Corte Clássico", "Corte Degradê", "Tratamento Capilar"]
-    },
-    { 
-      name: "João Santos", 
-      experience: "5 anos", 
-      rating: 4.8, 
-      specialty: "Barbas tradicionais",
-      bio: "Mestre em barbas tradicionais e bigodes. Técnica refinada e atenção aos detalhes.",
-      services: ["Barba & Bigode", "Barba Completa", "Corte + Barba"]
-    },
-    { 
-      name: "Pedro Lima", 
-      experience: "10 anos", 
-      rating: 5.0, 
-      specialty: "Penteados clássicos",
-      bio: "Veterano da barbearia com vasta experiência em estilos clássicos e sofisticados.",
-      services: ["Corte Clássico", "Tratamento Capilar", "Corte + Barba"]
-    },
-    { 
-      name: "Rafael Costa", 
-      experience: "3 anos", 
-      rating: 4.7, 
-      specialty: "Estilos jovens",
-      bio: "Jovem talento com energia e criatividade para estilos modernos e ousados.",
-      services: ["Corte Degradê", "Corte Clássico", "Barba & Bigode"]
-    }
-  ];
+  const { barbers, loading, error } = useBarbers();
+
+  if (loading) {
+    return (
+      <Layout>
+        <section className="py-20 px-4">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center">
+              <h1 className="text-5xl font-bold mb-4">Nossa Equipe</h1>
+              <p className="text-muted-foreground text-lg">Carregando...</p>
+            </div>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <section className="py-20 px-4">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center">
+              <h1 className="text-5xl font-bold mb-4">Nossa Equipe</h1>
+              <p className="text-muted-foreground text-lg">Erro ao carregar os barbeiros: {error}</p>
+            </div>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <section className="py-20 px-4">
-        <div className="container mx-auto">
+        <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold mb-4">Nossos Profissionais</h1>
-            <p className="text-muted-foreground text-lg">Mestres em sua arte, especialistas em estilo</p>
+            <h1 className="text-5xl font-bold mb-4">Nossa Equipe</h1>
+            <p className="text-muted-foreground text-lg">Conheça nossos profissionais especializados</p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {barbers.map((barber, index) => (
-              <Card key={index} className="card-hover glass-effect border-border/50">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {barbers.map((barber) => (
+              <Card key={barber.id} className="glass-effect border-border/50 hover:shadow-lg transition-shadow">
                 <CardHeader className="text-center">
-                  <div className="w-24 h-24 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Users className="h-12 w-12 text-primary-foreground" />
+                  <div className="w-24 h-24 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                    {barber.photo_url ? (
+                      <img src={barber.photo_url} alt={barber.name} className="object-cover w-full h-full" />
+                    ) : (
+                      <Users className="h-12 w-12 text-white" />
+                    )}
                   </div>
-                  <CardTitle className="text-2xl">{barber.name}</CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    {barber.specialty} • {barber.experience}
-                  </CardDescription>
+                  <CardTitle className="text-xl">{barber.name}</CardTitle>
+                  {/* Removido specialty */}
                 </CardHeader>
-                <CardContent className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
-                    <span className="ml-2 text-sm text-muted-foreground">{barber.rating}</span>
-                  </div>
+                <CardContent className="text-center space-y-4">
+                  {/* Removido rating e experiência */}
                   
-                  <p className="text-muted-foreground mb-4 text-sm">{barber.bio}</p>
-                  
-                  <div className="mb-4">
-                    <h4 className="font-semibold mb-2">Serviços:</h4>
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {barber.services.map((service, serviceIndex) => (
-                        <span 
-                          key={serviceIndex}
-                          className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs"
-                        >
-                          {service}
-                        </span>
-                      ))}
+                  {/* Removido bio */}
+
+                  {barber.services && barber.services.length > 0 && (
+                    <div className="space-y-2 mb-6">
+                      <p className="text-sm font-semibold text-primary">Especialidades:</p>
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        {barber.services.map((service, index) => (
+                          <span 
+                            key={index}
+                            className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                          >
+                            {service}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  
+                  )}
+
                   <Link to="/booking">
-                    <Button className="w-full bg-gradient-primary hover:opacity-90">
+                    <Button className="w-full mt-2" variant="white">
                       Agendar com {barber.name.split(' ')[0]}
                     </Button>
                   </Link>
@@ -96,12 +93,26 @@ const Barbers = () => {
           </div>
 
           <div className="text-center mt-16">
-            <h3 className="text-3xl font-bold mb-6">Escolha seu barbeiro preferido</h3>
-            <Link to="/booking">
-              <Button size="lg" className="bg-gradient-primary hover:opacity-90 text-lg px-8 py-4">
-                Fazer Agendamento
-              </Button>
-            </Link>
+            <Card className="glass-effect border-border/50 max-w-2xl mx-auto">
+              <CardHeader>
+                <CardTitle className="text-2xl">Quer fazer parte da nossa equipe?</CardTitle>
+                <CardDescription>
+                  Estamos sempre em busca de profissionais talentosos e dedicados
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
+                  Se você é um barbeiro experiente e apaixonado pelo que faz, 
+                  entre em contato conosco. Oferecemos ambiente de trabalho 
+                  agradável e oportunidades de crescimento.
+                </p>
+                <Link to="/contact">
+                  <Button variant="white">
+                    Entre em Contato
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

@@ -7,14 +7,142 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contacts: {
+        Row: {
+          id: string
+          name: string
+          email: string | null
+          phone: string
+          subject: string
+          message: string
+          created_at: string
+          status: 'pending' | 'read' | 'replied'
+        }
+        Insert: {
+          id?: string
+          name: string
+          email?: string | null
+          phone: string
+          subject: string
+          message: string
+          created_at?: string
+          status?: 'pending' | 'read' | 'replied'
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string | null
+          phone?: string
+          subject?: string
+          message?: string
+          created_at?: string
+          status?: 'pending' | 'read' | 'replied'
+        }
+      }
+      bookings: {
+        Row: {
+          id: string
+          name: string
+          phone: string
+          service: string
+          barber: string
+          date: string
+          time: string
+          notes: string | null
+          status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          phone: string
+          service: string
+          barber: string
+          date: string
+          time: string
+          notes?: string | null
+          status?: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          phone?: string
+          service?: string
+          barber?: string
+          date?: string
+          time?: string
+          notes?: string | null
+          status?: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+          created_at?: string
+        }
+      }
+      barbers: {
+        Row: {
+          id: string
+          name: string
+          experience: string | null
+          rating: number | null
+          specialty: string | null
+          bio: string | null
+          services: string[] | null
+          created_at: string
+          photo_url: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          experience?: string | null
+          rating?: number | null
+          specialty?: string | null
+          bio?: string | null
+          services?: string[] | null
+          created_at?: string
+          photo_url?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          experience?: string | null
+          rating?: number | null
+          specialty?: string | null
+          bio?: string | null
+          services?: string[] | null
+          created_at?: string
+          photo_url?: string | null
+        }
+      }
+      services: {
+        Row: {
+          id: string
+          name: string
+          price: number
+          duration: number
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          price: number
+          duration: number
+          description?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          price?: number
+          duration?: number
+          description?: string | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

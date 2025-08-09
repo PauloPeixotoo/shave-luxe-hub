@@ -7,8 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/Layout";
 import { useState } from "react";
+import { useServices, useBarbers, useCreateBooking } from "@/hooks/useSupabase";
+import { useToast } from "@/hooks/use-toast";
 
 const Booking = () => {
+  const { toast } = useToast();
+  const { services, loading: servicesLoading } = useServices();
+  const { barbers, loading: barbersLoading } = useBarbers();
+  const { createBooking, loading: isSubmitting } = useCreateBooking();
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -19,33 +26,50 @@ const Booking = () => {
     notes: ""
   });
 
-  const services = [
-    { value: "corte-classico", label: "Corte Clássico - R$ 35", duration: "30min" },
-    { value: "barba-bigode", label: "Barba & Bigode - R$ 25", duration: "20min" },
-    { value: "corte-barba", label: "Corte + Barba - R$ 55", duration: "45min" },
-    { value: "tratamento", label: "Tratamento Capilar - R$ 80", duration: "60min" },
-    { value: "corte-degrade", label: "Corte Degradê - R$ 40", duration: "35min" },
-    { value: "barba-completa", label: "Barba Completa - R$ 35", duration: "30min" },
-  ];
-
-  const barbers = [
-    { value: "carlos", label: "Carlos Silva - Cortes modernos" },
-    { value: "joao", label: "João Santos - Barbas tradicionais" },
-    { value: "pedro", label: "Pedro Lima - Penteados clássicos" },
-    { value: "rafael", label: "Rafael Costa - Estilos jovens" },
-  ];
-
   const timeSlots = [
     "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
     "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
     "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui seria implementada a lógica de envio do agendamento
-    console.log("Dados do agendamento:", formData);
-    alert("Agendamento solicitado! Entraremos em contato para confirmar.");
+    
+    try {
+      await createBooking({
+        name: formData.name,
+        phone: formData.phone,
+        service: formData.service,
+        barber: formData.barber,
+        date: formData.date,
+        time: formData.time,
+        notes: formData.notes || null
+      });
+
+      // Limpar formulário
+      setFormData({
+        name: "",
+        phone: "",
+        service: "",
+        barber: "",
+        date: "",
+        time: "",
+        notes: ""
+      });
+
+      toast({
+        title: "Sucesso!",
+        description: "Agendamento solicitado! Entraremos em contato para confirmar.",
+      });
+
+    } catch (error) {
+      console.error('Erro ao criar agendamento:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar o agendamento. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -103,13 +127,13 @@ const Booking = () => {
                       <div>
                         <Label htmlFor="service">Serviço *</Label>
                         <Select value={formData.service} onValueChange={(value) => setFormData({...formData, service: value})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Escolha um serviço" />
+                          <SelectTrigger disabled={servicesLoading}>
+                            <SelectValue placeholder={servicesLoading ? "Carregando..." : "Escolha um serviço"} />
                           </SelectTrigger>
                           <SelectContent>
                             {services.map((service) => (
-                              <SelectItem key={service.value} value={service.value}>
-                                {service.label}
+                              <SelectItem key={service.id} value={service.name}>
+                                {service.name} - R$ {service.price.toFixed(2).replace('.', ',')} ({service.duration}min)
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -118,13 +142,13 @@ const Booking = () => {
                       <div>
                         <Label htmlFor="barber">Barbeiro (Opcional)</Label>
                         <Select value={formData.barber} onValueChange={(value) => setFormData({...formData, barber: value})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Escolha um barbeiro" />
+                          <SelectTrigger disabled={barbersLoading}>
+                            <SelectValue placeholder={barbersLoading ? "Carregando..." : "Escolha um barbeiro"} />
                           </SelectTrigger>
                           <SelectContent>
                             {barbers.map((barber) => (
-                              <SelectItem key={barber.value} value={barber.value}>
-                                {barber.label}
+                              <SelectItem key={barber.id} value={barber.name}>
+                                {barber.name} - {barber.specialty}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -174,8 +198,14 @@ const Booking = () => {
                       />
                     </div>
 
-                    <Button type="submit" size="lg" className="w-full bg-gradient-primary hover:opacity-90">
-                      Solicitar Agendamento
+                    <Button 
+                      type="submit" 
+                      size="lg" 
+                      variant="white"
+                      className="w-full"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Enviando..." : "Solicitar Agendamento"}
                     </Button>
                   </form>
                 </CardContent>

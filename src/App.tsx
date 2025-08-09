@@ -1,39 +1,92 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Services from "./pages/Services";
-import Barbers from "./pages/Barbers";
-import Booking from "./pages/Booking";
-import Contact from "./pages/Contact";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
+import Layout from "@/components/Layout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import RedirectIfAuthenticated from "@/components/RedirectIfAuthenticated";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const queryClient = new QueryClient();
+// Lazy loading para melhor performance
+const Home = lazy(() => import("@/pages/Home"));
+const Index = lazy(() => import("@/pages/Index"));
+const Services = lazy(() => import("@/pages/Services"));
+const Barbers = lazy(() => import("@/pages/Barbers"));
+const Booking = lazy(() => import("@/pages/Booking"));
+const Contact = lazy(() => import("@/pages/Contact"));
+const Login = lazy(() => import("@/pages/Login"));
+const Admin = lazy(() => import("@/pages/Admin"));
+const BarberDashboard = lazy(() => import("@/pages/BarberDashboard"));
+const DashboardSelector = lazy(() => import("@/pages/DashboardSelector"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <div className="dark">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/barbers" element={<Barbers />} />
-            <Route path="/booking" element={<Booking />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/admin" element={<Admin />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </TooltipProvider>
-  </QueryClientProvider>
+// Loading component
+const LoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+  </div>
 );
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <Router>
+        <div className="App">
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              {/* Rotas públicas */}
+              <Route path="/" element={<Home />} />
+              <Route path="/index" element={<Index />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/barbers" element={<Barbers />} />
+              <Route path="/booking" element={<Booking />} />
+              <Route path="/contact" element={<Contact />} />
+              
+              {/* Rota de login com redirecionamento se já autenticado */}
+              <Route 
+                path="/login" 
+                element={
+                  <RedirectIfAuthenticated redirectTo="/selector">
+                    <Login />
+                  </RedirectIfAuthenticated>
+                } 
+              />
+              
+              {/* Rotas protegidas */}
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <BarberDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/selector" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardSelector />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Rota 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+          
+          <Toaster />
+        </div>
+      </Router>
+    </ErrorBoundary>
+  );
+}
 
 export default App;
