@@ -64,12 +64,12 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card className="glass-effect border-border/50">
+        <Card className="glass-effect border-border/50 bg-transparent">
           <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto mb-4 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-black shadow-sm ring-1 ring-white/10">
               <Scissors className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl">Área do Barbeiro</CardTitle>
+            <CardTitle className="text-2xl text-white">Área do Barbeiro</CardTitle>
             <CardDescription>
               Faça login para acessar o painel administrativo
             </CardDescription>
@@ -112,7 +112,8 @@ const Login = () => {
 
               <Button 
                 type="submit" 
-                className="w-full bg-gradient-primary hover:opacity-90"
+                variant="white"
+                className="w-full text-lg px-8 py-6"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Entrando..." : "Entrar"}
