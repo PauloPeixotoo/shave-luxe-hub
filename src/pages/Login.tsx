@@ -38,8 +38,16 @@ const Login = () => {
           description: "Login realizado com sucesso. Redirecionando...",
         });
 
-        // Redirecionar para o seletor de dashboard
-        navigate("/selector");
+        // Determine role by email and redirect accordingly
+        const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS as string | undefined)
+          ? (import.meta.env.VITE_ADMIN_EMAILS as string).split(',').map(s => s.trim().toLowerCase())
+          : ['owner@barbershop.com'];
+        const email = data.user.email?.toLowerCase() ?? '';
+        if (ADMIN_EMAILS.includes(email)) {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
       console.error('Erro no login:', error);

@@ -82,7 +82,7 @@ const Barbers = () => {
                     </div>
                   )}
 
-                  <Link to="/booking">
+                  <Link to={`/booking?barber=${encodeURIComponent(barber.name)}`}>
                     <Button className="w-full mt-2" variant="white">
                       Agendar com {barber.name.split(' ')[0]}
                     </Button>

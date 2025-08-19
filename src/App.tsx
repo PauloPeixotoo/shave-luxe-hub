@@ -50,6 +50,14 @@ function App() {
                   </RedirectIfAuthenticated>
                 } 
               />
+              <Route 
+                path="/staff-login" 
+                element={
+                  <RedirectIfAuthenticated redirectTo="/selector">
+                    <Login />
+                  </RedirectIfAuthenticated>
+                } 
+              />
               
               {/* Rotas protegidas */}
               <Route 

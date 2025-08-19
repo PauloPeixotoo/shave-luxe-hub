@@ -95,6 +95,39 @@ export const useCreateBooking = () => {
   return { createBooking, loading, error };
 };
 
+// Hook para criar um novo barbeiro (usado no dashboard admin)
+export const useCreateBarber = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const createBarber = async (barberData: { name: string; photo_url?: string | null; services?: string[] }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('barbers')
+        .insert([{
+          name: barberData.name,
+          photo_url: barberData.photo_url ?? null,
+          services: barberData.services ?? null
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao criar barbeiro';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { createBarber, loading, error };
+};
+
 // Hook para buscar agendamentos (para admin)
 export const useBookings = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);

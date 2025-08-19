@@ -76,7 +76,7 @@ const Services = () => {
                     <div className="text-3xl font-bold gradient-text mb-4 text-center">
                       R$ {service.price.toFixed(2).replace('.', ',')}
                     </div>
-                    <Link to="/booking">
+                    <Link to={`/booking?service=${encodeURIComponent(service.name)}`}>
                       <Button className="w-full flex justify-center" variant="white">
                         Agendar Agora
                       </Button>
@@ -106,7 +106,7 @@ const Services = () => {
                     <p className="text-sm text-muted-foreground">4 cortes por mês com desconto</p>
                   </div>
                 </div>
-                <Link to="/booking">
+                <Link to={`/booking?service=${encodeURIComponent('Pacote Especial')}`}>
                   <Button size="lg" variant="white" className="text-lg px-8 py-4">
                     Fazer Agendamento
                   </Button>

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout";
-import { useBookings, useUpdateBookingStatus, useStats, useHistoricalData } from "@/hooks/useSupabase";
+import { useBookings, useUpdateBookingStatus, useStats, useHistoricalData, useCreateBarber } from "@/hooks/useSupabase";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -18,9 +18,10 @@ const Admin = () => {
   const { updateStatus, loading: updatingStatus } = useUpdateBookingStatus();
   const { stats, loading: statsLoading, error: statsError } = useStats();
   const { historicalData, loading: historicalLoading, error: historicalError } = useHistoricalData();
+  const { createBarber, loading: creatingBarber } = useCreateBarber();
 
-
-
+  const [newBarber, setNewBarber] = useState({ name: '', photo_url: '', services: '' });
+  
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
     try {
       await updateStatus(bookingId, newStatus);
@@ -48,7 +49,7 @@ const Admin = () => {
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso.",
       });
-      navigate("/");
+      navigate("/staff-login");
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
       toast({
@@ -56,6 +57,24 @@ const Admin = () => {
         description: "Erro ao fazer logout.",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleCreateBarber = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBarber.name.trim()) {
+      toast({ title: 'Erro', description: 'Nome do barbeiro é obrigatório', variant: 'destructive' });
+      return;
+    }
+    try {
+      const servicesArr = newBarber.services.split(',').map(s => s.trim()).filter(Boolean);
+      await createBarber({ name: newBarber.name.trim(), photo_url: newBarber.photo_url || null, services: servicesArr });
+      toast({ title: 'Sucesso', description: 'Barbeiro criado com sucesso' });
+      setNewBarber({ name: '', photo_url: '', services: '' });
+      refetch();
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Erro', description: 'Não foi possível criar barbeiro', variant: 'destructive' });
     }
   };
 
@@ -336,10 +355,37 @@ const Admin = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-      </section>
-    </Layout>
-  );
-};
 
-export default Admin;
+          {/* Criar novo barbeiro */}
+          <Card className="glass-effect border-border/50 mt-6">
+            <CardHeader>
+              <CardTitle className="text-2xl">Adicionar Novo Barbeiro</CardTitle>
+              <CardDescription>Adicione um novo membro da equipe</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleCreateBarber} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Nome</label>
+                  <input value={newBarber.name} onChange={(e) => setNewBarber({...newBarber, name: e.target.value})} className="w-full p-2 rounded border" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Imagem (URL)</label>
+                  <input value={newBarber.photo_url} onChange={(e) => setNewBarber({...newBarber, photo_url: e.target.value})} className="w-full p-2 rounded border" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Especialidades (separadas por vírgula)</label>
+                  <input value={newBarber.services} onChange={(e) => setNewBarber({...newBarber, services: e.target.value})} className="w-full p-2 rounded border" />
+                </div>
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={creatingBarber}>{creatingBarber ? 'Criando...' : 'Criar Barbeiro'}</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+         </div>
+       </section>
+     </Layout>
+   );
+ };
+ 
+ export default Admin;

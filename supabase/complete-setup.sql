@@ -132,11 +132,11 @@ INSERT INTO services (name, price, duration, description) VALUES
   ('Pigmentação', 40.00, 25, 'Coloração para cabelo e barba')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO barbers (name, specialty, experience, image) VALUES
-  ('João Silva', 'Cortes Modernos', '5 anos', '/barbers/joao.jpg'),
-  ('Maria Santos', 'Barbas', '3 anos', '/barbers/maria.jpg'),
-  ('Carlos Oliveira', 'Cortes Clássicos', '8 anos', '/barbers/carlos.jpg'),
-  ('Ana Costa', 'Cortes Femininos', '4 anos', '/barbers/ana.jpg')
+INSERT INTO barbers (name, experience, image) VALUES
+  ('João Silva', '5 anos', '/barbers/joao.jpg'),
+  ('Maria Santos', '3 anos', '/barbers/maria.jpg'),
+  ('Carlos Oliveira', '8 anos', '/barbers/carlos.jpg'),
+  ('Ana Costa', '4 anos', '/barbers/ana.jpg')
 ON CONFLICT DO NOTHING;
 
 -- 13. Inserir alguns agendamentos de exemplo

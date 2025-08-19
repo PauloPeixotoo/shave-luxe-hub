@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/Layout";
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useServices, useBarbers, useCreateBooking } from "@/hooks/useSupabase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,11 +17,16 @@ const Booking = () => {
   const { barbers, loading: barbersLoading } = useBarbers();
   const { createBooking, loading: isSubmitting } = useCreateBooking();
 
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const defaultService = params.get("service") || "";
+  const defaultBarber = params.get("barber") || "";
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    service: "",
-    barber: "",
+    service: defaultService,
+    barber: defaultBarber,
     date: "",
     time: "",
     notes: ""
@@ -140,15 +146,15 @@ const Booking = () => {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="barber">Barbeiro (Opcional)</Label>
-                        <Select value={formData.barber} onValueChange={(value) => setFormData({...formData, barber: value})}>
+                        <Label htmlFor="barber">Barbeiro *</Label>
+                        <Select value={formData.barber} onValueChange={(value) => setFormData({...formData, barber: value})} required>
                           <SelectTrigger disabled={barbersLoading}>
                             <SelectValue placeholder={barbersLoading ? "Carregando..." : "Escolha um barbeiro"} />
                           </SelectTrigger>
                           <SelectContent>
                             {barbers.map((barber) => (
                               <SelectItem key={barber.id} value={barber.name}>
-                                {barber.name} - {barber.specialty}
+                                {barber.name}
                               </SelectItem>
                             ))}
                           </SelectContent>

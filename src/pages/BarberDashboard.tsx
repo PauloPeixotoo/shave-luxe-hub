@@ -155,7 +155,7 @@ const BarberDashboard = () => {
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso.",
       });
-      navigate("/");
+      navigate("/staff-login");
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
       toast({
